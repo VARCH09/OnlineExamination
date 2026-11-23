@@ -1,258 +1,160 @@
-# 🎓 Online Examination System
+# 🎓 Online Examination System (SkillQuest)
 
-A complete full-stack web application for conducting online exams.
+A complete full-stack web application for conducting and managing online mock examinations, built with a modern EdTech interface inspired by platforms like Unacademy and NTA CBT platforms.
 
 | Layer    | Technology |
 |----------|-----------|
-| Frontend | React 18 + Vite |
+| Frontend | React 19 + Vite + Lucide Icons + React Router |
 | Backend  | Node.js + Express |
-| Database | MySQL (via mysql2) |
-| Auth     | JWT + bcrypt |
+| Database | MySQL (via `mysql2`) |
+| Auth     | JWT + bcryptjs |
 
 ---
 
-## 📁 Project Structure
+## 👥 Teammate Setup Guide (Replicate on Another System)
+
+Share these instructions with any teammate who needs to run this project locally.
+
+### 📌 Prerequisites
+Make sure your system has:
+1. **Git** ([Download Git](https://git-scm.com/downloads))
+2. **Node.js v18 or higher** ([Download Node.js](https://nodejs.org/))
+3. **MySQL Server** running locally (via MySQL Workbench, XAMPP, or Windows MySQL Service)
+
+---
+
+### Step 1: Clone the Repository
+Open a terminal (PowerShell, Command Prompt, or Git Bash) and run:
+```bash
+git clone https://github.com/VARCH09/OnlineExamination.git
+cd OnlineExamination
+```
+
+---
+
+### Step 2: Configure the Backend & Database
+
+1. Navigate to the `backend` directory and install dependencies:
+   ```bash
+   cd backend
+   npm install
+   ```
+
+2. Create your local environment file from the example:
+   - On **Windows (PowerShell)**:
+     ```powershell
+     Copy-Item .env.example .env
+     ```
+   - On **Mac / Linux / Git Bash**:
+     ```bash
+     cp .env.example .env
+     ```
+
+3. Open the newly created `backend/.env` file in VS Code or Notepad and set your local MySQL password:
+   ```env
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=your_actual_mysql_password
+   DB_NAME=online_examination_system
+
+   JWT_SECRET=super_secret_jwt_key_change_me
+   PORT=5000
+   ```
+   *(If your MySQL root user has no password, leave `DB_PASSWORD=` empty).*
+
+4. **Run the 1-step automated database setup:**
+   ```bash
+   npm run setup-db
+   ```
+   > ✅ This automatically creates the `online_examination_system` database, builds all 8 tables and 3 views, and loads 50+ sample records and questions across 5 subjects.
+
+---
+
+### Step 3: Setup the Frontend
+
+Open a **second terminal window** and run:
+```bash
+cd OnlineExamination/frontend
+npm install
+```
+
+---
+
+### Step 4: Run the Application
+
+Keep **both terminals** open:
+
+#### Terminal 1 (Backend Server)
+```bash
+cd OnlineExamination/backend
+npm run dev
+```
+→ Server active at **http://localhost:5000**
+
+#### Terminal 2 (Frontend Client)
+```bash
+cd OnlineExamination/frontend
+npm run dev
+```
+→ Web Portal running at **http://localhost:5173**
+
+Now open your browser and navigate to **http://localhost:5173**.
+
+---
+
+## 🔑 Demo Credentials (Or Use 1-Click Autofill on Login)
+
+| Role | Email | Password | Access Level |
+|------|-------|----------|--------------|
+| **Admin** | `admin@exam.com` | `password` | Manage students, questions, tests & view reports |
+| **Student** | `alice@student.com` | `password` | Take mock tests, view scores & scorecard history |
+| **Student** | `bob@student.com` | `password` | Student assessment account |
+
+*(You can also register new student candidate accounts directly through the registration page).*
+
+---
+
+## 🗄️ Database Architecture
+
+The MySQL database `online_examination_system` contains 8 interconnected tables:
+
+1. **`users`**: Candidate and administrator accounts with bcrypt password hashes.
+2. **`subjects`**: Academic disciplines (Mathematics, CS, DB Systems, Physics, English).
+3. **`questions`**: 4-choice multiple choice items with correct keys and marks.
+4. **`exams`**: Test definitions with duration, total marks, pass criteria, and schedule.
+5. **`exam_questions`**: Many-to-many junction mapping question pools to exams.
+6. **`exam_attempts`**: Individual student test sessions with timer and start/finish timestamps.
+7. **`answers`**: Student's selected option per question in an attempt (enforces no duplicate answers).
+8. **`results`**: Server-side evaluated scores, percentages, and pass/fail verdicts.
+
+### SQL Views Available:
+- `v_exam_summary`: Per-exam attempt count, average score, pass/fail totals.
+- `v_student_results`: Detailed candidate test ledger.
+- `v_subject_question_count`: Question pool volume per subject.
+
+---
+
+## 🛠️ Project Structure
 
 ```
-DBS_Group/
+OnlineExamination/
 ├── database/
-│   ├── schema.sql      ← Create all 8 tables + 3 views
-│   ├── seed.sql        ← 50+ sample records
-│   └── queries.sql     ← 13 demonstration SQL queries
+│   ├── schema.sql           # Database DDL (8 tables + 3 views + constraints)
+│   ├── seed.sql             # 50+ sample test questions and data
+│   └── queries.sql          # 13 relational queries (JOIN, GROUP BY, subqueries)
 ├── backend/
-│   ├── server.js       ← Express entry point
-│   ├── config/db.js    ← MySQL connection pool
-│   ├── middleware/
-│   │   ├── auth.js     ← JWT verify + role guards
-│   │   └── validate.js ← Input validation helpers
-│   ├── routes/
-│   │   ├── auth.js     ← /api/auth  (login, register, /me)
-│   │   ├── users.js    ← /api/users (admin: manage students)
-│   │   ├── subjects.js ← /api/subjects
-│   │   ├── questions.js← /api/questions
-│   │   ├── exams.js    ← /api/exams + question assignment
-│   │   ├── attempts.js ← /api/attempts (start, answer, submit)
-│   │   └── reports.js  ← /api/reports
-│   ├── .env            ← Your secrets (never commit!)
-│   ├── .env.example    ← Template
-│   └── package.json
+│   ├── server.js            # Express server entry point
+│   ├── config/db.js         # MySQL2 connection pool
+│   ├── middleware/          # JWT auth guards & input validation
+│   ├── routes/              # REST API controllers (auth, exams, attempts, reports)
+│   ├── scripts/setup-db.js  # Automated DB initialization script
+│   └── .env.example         # Environment template
 └── frontend/
     ├── src/
-    │   ├── api/axios.js          ← Axios with JWT interceptor
-    │   ├── context/AuthContext.jsx
-    │   ├── components/Layout.jsx ← Sidebar + topbar
-    │   └── pages/
-    │       ├── Login.jsx
-    │       ├── Register.jsx
-    │       ├── Dashboard.jsx
-    │       ├── Students.jsx
-    │       ├── Subjects.jsx
-    │       ├── Questions.jsx
-    │       ├── Exams.jsx
-    │       ├── ExamDetail.jsx    ← Assign questions to exams
-    │       ├── AvailableExams.jsx
-    │       ├── TakeExam.jsx      ← Countdown + answer saving
-    │       ├── ResultDetail.jsx
-    │       ├── MyResults.jsx
-    │       ├── Attempts.jsx
-    │       └── Reports.jsx
-    ├── .env
-    └── package.json
+    │   ├── components/      # EdTech layout, sidebar & navigation
+    │   ├── context/         # AuthContext with localStorage token persistence
+    │   ├── pages/           # 14 pages (CBT Room, Scorecard, Test Series, Admin)
+    │   └── index.css        # Unacademy-inspired design system
+    └── vite.config.js       # Vite configuration with API proxy
 ```
-
----
-
-## ⚙️ Setup Instructions
-
-### 1 — MySQL Setup
-
-1. Open **MySQL Workbench** (or any MySQL client).
-2. Run the schema file first:
-   ```sql
-   SOURCE path/to/DBS_Group/database/schema.sql;
-   ```
-3. Run the seed file to load sample data:
-   ```sql
-   SOURCE path/to/DBS_Group/database/seed.sql;
-   ```
-4. (Optional) Run demonstration queries:
-   ```sql
-   SOURCE path/to/DBS_Group/database/queries.sql;
-   ```
-
-> **Note:** The seed file uses a known bcrypt hash for the password `"password"`.
-> Use this password when logging in with the demo accounts below.
-> Any new accounts registered through the UI will hash correctly.
-
----
-
-### 2 — Backend Setup
-
-```bash
-cd DBS_Group/backend
-
-# 1. Install dependencies
-npm install
-
-# 2. Configure environment
-#    Edit .env with your MySQL password and a secret key:
-#    DB_PASSWORD=your_mysql_password
-#    JWT_SECRET=any_long_random_string
-
-# 3. Start the server
-npm run dev      # development (nodemon, auto-restart)
-# or
-npm start        # production
-```
-
-The backend runs at **http://localhost:5000**
-
----
-
-### 3 — Frontend Setup
-
-```bash
-cd DBS_Group/frontend
-
-# 1. Install dependencies
-npm install
-
-# 2. Start Vite dev server
-npm run dev
-```
-
-The frontend runs at **http://localhost:5173**
-
----
-
-## 🔑 Demo Login Credentials
-
-| Role    | Email               | Password |
-|---------|---------------------|----------|
-| Admin   | admin@exam.com      | password |
-| Student | alice@student.com   | password |
-| Student | bob@student.com     | password |
-
-> You can also register a new student account from the Register page.
-
----
-
-## 🌐 API Endpoints
-
-### Auth
-| Method | Endpoint          | Access  | Description |
-|--------|-------------------|---------|-------------|
-| POST   | /api/auth/register| Public  | Student registration |
-| POST   | /api/auth/login   | Public  | Login (returns JWT) |
-| GET    | /api/auth/me      | Any     | Get current user |
-
-### Users (Students)
-| Method | Endpoint        | Access | Description |
-|--------|-----------------|--------|-------------|
-| GET    | /api/users      | Admin  | List all students |
-| POST   | /api/users      | Admin  | Create student |
-| PUT    | /api/users/:id  | Admin  | Update student |
-| DELETE | /api/users/:id  | Admin  | Delete student |
-
-### Subjects
-| Method | Endpoint           | Access | Description |
-|--------|--------------------|--------|-------------|
-| GET    | /api/subjects      | Any    | List subjects |
-| POST   | /api/subjects      | Admin  | Create subject |
-| PUT    | /api/subjects/:id  | Admin  | Update subject |
-| DELETE | /api/subjects/:id  | Admin  | Delete subject |
-
-### Questions
-| Method | Endpoint            | Access | Description |
-|--------|---------------------|--------|-------------|
-| GET    | /api/questions      | Any    | List questions |
-| POST   | /api/questions      | Admin  | Create question |
-| PUT    | /api/questions/:id  | Admin  | Update question |
-| DELETE | /api/questions/:id  | Admin  | Delete question |
-
-### Exams
-| Method | Endpoint                      | Access  | Description |
-|--------|-------------------------------|---------|-------------|
-| GET    | /api/exams                    | Any     | List exams |
-| POST   | /api/exams                    | Admin   | Create exam |
-| PUT    | /api/exams/:id                | Admin   | Update exam |
-| DELETE | /api/exams/:id                | Admin   | Delete exam |
-| GET    | /api/exams/:id/questions      | Any     | Questions in exam |
-| POST   | /api/exams/:id/questions      | Admin   | Assign questions |
-| DELETE | /api/exams/:id/questions/:qid | Admin   | Remove question |
-
-### Attempts
-| Method | Endpoint                  | Access  | Description |
-|--------|---------------------------|---------|-------------|
-| GET    | /api/attempts             | Admin   | All attempts |
-| GET    | /api/attempts/my          | Student | My attempts |
-| POST   | /api/attempts/start       | Student | Start exam |
-| POST   | /api/attempts/:id/answer  | Student | Save answer |
-| POST   | /api/attempts/:id/submit  | Student | Submit exam |
-| GET    | /api/attempts/:id/result  | Any     | Get result |
-
-### Reports
-| Method | Endpoint                              | Access | Description |
-|--------|---------------------------------------|--------|-------------|
-| GET    | /api/reports/exam-summary             | Admin  | Exam stats |
-| GET    | /api/reports/pass-fail                | Admin  | Pass/fail counts |
-| GET    | /api/reports/top-scorers              | Admin  | Top 10 students |
-| GET    | /api/reports/above-average            | Admin  | Above-avg students |
-| GET    | /api/reports/subject-question-count   | Admin  | Subject stats |
-| GET    | /api/reports/student-results          | Admin  | All results |
-
----
-
-## 🗄️ Database Relationships
-
-```
-users (id) ←── exam_attempts.student_id
-users (id) ←── results.student_id
-
-subjects (id) ←── questions.subject_id
-subjects (id) ←── exams.subject_id
-
-exams (id) ←── exam_questions.exam_id
-exams (id) ←── exam_attempts.exam_id
-exams (id) ←── results.exam_id
-
-questions (id) ←── exam_questions.question_id
-questions (id) ←── answers.question_id
-
-exam_attempts (id) ←── answers.attempt_id
-exam_attempts (id) ←── results.attempt_id  (1-to-1, UNIQUE)
-```
-
-### Key Constraints
-- Passwords are stored as **bcrypt hashes** (10 rounds)
-- Duplicate answers for the same question in the same attempt are prevented via UNIQUE key
-- A student cannot start an already-submitted exam (server-enforced)
-- Correct answers are **never sent to the student** before submission
-- Score is calculated **server-side** after submission
-- Foreign-key CASCADE deletes propagate correctly
-
----
-
-## 🚀 Run Commands (Quick Reference)
-
-```bash
-# Terminal 1 – Backend
-cd DBS_Group/backend
-npm run dev
-
-# Terminal 2 – Frontend
-cd DBS_Group/frontend
-npm run dev
-```
-
-Then open http://localhost:5173 in your browser.
-
----
-
-## 📋 SQL Views
-
-| View | Description |
-|------|-------------|
-| `v_exam_summary` | Per-exam attempt count, avg/max/min score, pass/fail counts |
-| `v_student_results` | All results with student name, exam title, subject, score |
-| `v_subject_question_count` | Questions per subject and total marks available |
